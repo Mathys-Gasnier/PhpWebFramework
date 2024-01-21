@@ -1,0 +1,15 @@
+{
+    "name": "mathys-gasnier/web-framework",
+    "authors": [
+        {
+            "name": "Mathys-Gasnier"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Framework\\": "Framework/",
+            "Controllers\\": "src/controllers/"
+        }
+    }
+}
