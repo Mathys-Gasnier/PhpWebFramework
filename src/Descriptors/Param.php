@@ -4,15 +4,28 @@ namespace Framework\Descriptors;
 use Framework\Attributes\Utils as AttributesUtils;
 use Framework\Descriptors\Params\QueryParam;
 use Framework\Descriptors\Params\BodyParserParam;
+use Framework\Descriptors\Params\HeaderParam;
 
 class Param {
 
-    public function __construct(private \ReflectionParameter $metadata) {}
-
     public static function construct(\ReflectionParameter $metadata) {
-        if(AttributesUtils::findAttribute($metadata, "Framework\Attributes\QueryParam") != null) {
-            return new QueryParam($metadata);
-        }else if(AttributesUtils::findAttribute($metadata, "Framework\Attributes\BodyParser") != null) {
+        if(AttributesUtils::findAttribute($metadata, "Framework\Attributes\Params\QueryParam") != null) {
+            $queryParam = AttributesUtils::findAttribute($metadata, "Framework\Attributes\Params\QueryParam")->newInstance();
+
+            // Get name from attribute, but default to parameter name
+            return new QueryParam(
+                $queryParam && $queryParam->getParamName() ? $queryParam->getParamName() : $metadata->getName(),
+                $metadata->getType()->allowsNull()
+            );
+        }else if(AttributesUtils::findAttribute($metadata, "Framework\Attributes\Params\HeaderParam") != null) {
+            $headerParam = AttributesUtils::findAttribute($metadata, "Framework\Attributes\Params\HeaderParam")->newInstance();
+
+            // Get name from attribute, but default to parameter name
+            return new HeaderParam(
+                strtolower($headerParam && $headerParam->getHeaderName() ? $headerParam->getHeaderName() : $metadata->getName()),
+                $metadata->getType()->allowsNull()
+            );
+        }else if(AttributesUtils::findAttribute($metadata, "Framework\Attributes\Params\BodyParser") != null) {
             $bodyParserType = $metadata->getType();
             
             // Makes sure the type is a class/class constructor
@@ -31,11 +44,9 @@ class Param {
             ) throw new \Error('Attribute #[BodyParser] requires a type that implements Framework\BodyParsers\BodyParser');
 
             return new BodyParserParam($bodyParserClassName);
+        }else {
+            return null;
         }
-    }
-
-    public function getMetadata(): \ReflectionParameter {
-        return $this->metadata;
     }
 
 }

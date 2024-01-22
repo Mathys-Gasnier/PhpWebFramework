@@ -29,11 +29,13 @@ class Server {
 
         // The params are just what's in $_GET
         $params = $_GET;
+        // Get all key=>value headers
+        $headers = array_change_key_case(getallheaders());
         // Getting the raw text body is dumb in php.
         $body = file_get_contents('php://input');
 
         try {
-            $request = new Request($path, $method, $params, $body);
+            $request = new Request($path, $method, $params, $headers, $body);
 
             $response = $this->router->route($request);
         }catch(\Error $err) {
@@ -43,6 +45,11 @@ class Server {
         }
     	
         http_response_code($response->code);
+        
+        foreach($response->headers as $header) {
+            header($header);
+        }
+
         echo $response->body;
     }
     

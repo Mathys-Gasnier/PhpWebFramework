@@ -7,6 +7,7 @@ use Framework\Descriptors\Controller as DescriptorController;
 use Framework\Descriptors\Route as DescriptorRoute;
 use Framework\Descriptors\Params\QueryParam;
 use Framework\Descriptors\Params\BodyParserParam;
+use Framework\Descriptors\Params\HeaderParam;
 
 class Invoker {
     public static function invokeRoute(DescriptorRoute $route, Request $request): Response {
@@ -15,11 +16,21 @@ class Invoker {
         // resolving route params to real value args
         foreach($route->getParams() as $param) {
             if($param instanceof QueryParam) {
-                // If the query param doesn't exist we return an 400 error
-                if(!isset($request->getParams()[$param->getMetadata()->getName()])) {
-                    return new Response("Missing query param `" . $param->getMetadata()->getName() . "`", 400);
+                $paramExists = isset($request->getParams()[$param->getParamName()]);
+                // If the param is not nullable and the param isn't set on the request we return an error
+                if(!$param->getNullable() && !$paramExists) {
+                    return new Response("Missing query param `" . $param->getParamName() . "`", 400);
                 }
-                $args[] = $request->getParams()[$param->getMetadata()->getName()];
+                
+                $args[] = $paramExists ? $request->getParams()[$param->getParamName()] : null;
+            }else if($param instanceof HeaderParam) {
+                $headerExists = isset($request->getHeaders()[$param->getHeaderName()]);
+                // If the header is not nullable and the header isn't set on the request we return an error
+                if(!$param->getNullable() && !$headerExists) {
+                    return new Response("Missing header `" . $param->getHeaderName() . "`", 400);
+                }
+
+                $args[] = $headerExists ? $request->getHeaders()[$param->getHeaderName()] : null;
             }else if($param instanceof BodyParserParam) {
                 $args[] = new ($param->getBodyParserClassName())($request->getBody());
             }

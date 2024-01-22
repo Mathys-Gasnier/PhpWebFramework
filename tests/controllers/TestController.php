@@ -2,9 +2,9 @@
 namespace Controllers;
 
 use Framework\Attributes\Controller;
-use Framework\Attributes\QueryParam;
 use Framework\Attributes\Route;
-use Framework\Attributes\BodyParser;
+use Framework\Attributes\Params\QueryParam;
+use Framework\Attributes\Params\BodyParser;
 use Framework\BodyParsers\RawBodyParser;
 use Framework\Method;
 use Framework\Response;

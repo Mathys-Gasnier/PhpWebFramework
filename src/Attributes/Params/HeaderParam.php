@@ -2,12 +2,12 @@
 namespace Framework\Attributes\Params;
 
 #[\Attribute(\Attribute::TARGET_PARAMETER)]
-class QueryParam {
+class HeaderParam {
     public function __construct(
-        private ?string $paramName = null
+        private ?string $headerName = null
     ) {}
 
-    public function getParamName() {
-        return $this->paramName;
+    public function getHeaderName() {
+        return $this->headerName;
     }
 }

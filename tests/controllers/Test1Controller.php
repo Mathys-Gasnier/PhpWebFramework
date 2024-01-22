@@ -1,8 +1,8 @@
 <?php
 namespace Controllers;
 
-use Framework\Attributes\Child;
 use Framework\Attributes\Controller;
+use Framework\Attributes\Child;
 use Framework\Attributes\Route;
 use Framework\Response;
 
