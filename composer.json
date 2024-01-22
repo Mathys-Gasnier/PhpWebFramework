@@ -8,8 +8,8 @@
     "require": {},
     "autoload": {
         "psr-4": {
-            "Framework\\": "Framework/",
-            "Controllers\\": "src/controllers/"
+            "Framework\\": "src/",
+            "Controllers\\": "tests/controllers/"
         }
     }
 }
