@@ -12,8 +12,10 @@ class Invoker {
     public static function invokeRoute(DescriptorRoute $route, DescriptorController $controller, Request $request): Response {
         $args = [];
 
+        // resolving route params to real value args
         foreach($route->getParams() as $param) {
             if($param instanceof QueryParam) {
+                // If the query param doesn't exist we return an 400 error
                 if(!isset($request->getParams()[$param->getMetadata()->getName()])) {
                     return new Response("Missing query param `" . $param->getMetadata()->getName() . "`", 400);
                 }
@@ -39,13 +41,15 @@ class Router {
         foreach($this->controllerManager->getControllers() as $controller) {
             $controllerPath = ltrim($controller->getMetadata()->getPath(), '/');
             
+            // If the start of the path is the same as the controller path, then we can proceed
             if(!str_starts_with($path, $controllerPath)) continue;
             
+            // We try to match a route in the controller
             $subPath = ltrim(substr($path, strlen($controllerPath)), '/');
             $route = $this->routeInController($request, $subPath, $controller);
 
+            // If we found a route we invoke it and return the response
             if($route == null) continue;
-
             return Invoker::invokeRoute($route, $controller, $request);
         }
 
@@ -54,6 +58,7 @@ class Router {
 
     private function routeInController(Request $request, string $path, DescriptorController $controller): ?DescriptorRoute {
         foreach($controller->getRoutes() as $route) {
+            // Try to find a matching route by method and path
             if($route->getMetadata()->getMethod() != $request->getMethod()) continue;
             
             $routePath = ltrim($route->getMetadata()->getPath(), '/');

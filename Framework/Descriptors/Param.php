@@ -22,6 +22,8 @@ class Param {
         }else if(AttributesUtils::findAttribute($metadata, "Framework\Attributes\BodyParser") != null) {
             $bodyParserType = $metadata->getType();
             
+            // Makes sure the type is a body parser
+            // TODO: Add a check to see if the type extends BodyParser
             if(
                 $bodyParserType == null ||
                 !($bodyParserType instanceof ReflectionNamedType) ||
