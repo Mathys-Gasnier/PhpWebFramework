@@ -6,10 +6,13 @@ use Framework\Attributes\Controller as AttributeController;
 use Framework\Descriptors\Route as DescriptorRoute;
 
 use ReflectionClass;
+use ReflectionNamedType;
+use ReflectionProperty;
 
 class Controller {
     private $instance;
     private AttributeController $metadata;
+    private array $childs = [];
     private array $routes = [];
     
     public function __construct(
@@ -23,6 +26,13 @@ class Controller {
         $this->metadata = $attribute->newInstance();
         $this->instance = new $class();
 
+        // Child controller are class properties with a #[Child()] attribute
+        foreach($reflection->getProperties() as $property) {
+            if(AttributesUtils::findAttribute($property, "Framework\Attributes\Child") == null) continue;
+
+            $this->childs[] = self::fromProperty($property);
+        }
+
         // Routes are methods with a #[Route()] attribute
         foreach($reflection->getMethods() as $method) {
             $routeAttribute = AttributesUtils::findAttribute($method, "Framework\Attributes\Route");
@@ -31,9 +41,23 @@ class Controller {
 
             $this->routes[] = new DescriptorRoute(
                 $routeMetadata,
-                $method
+                $method,
+                $this
             );
         }
+    }
+
+    public static function fromProperty(ReflectionProperty $property): Controller {
+        $propertyType = $property->getType();
+
+        // Makes sure the type is a class/class constructor
+        if(
+            $propertyType == null ||
+            !($propertyType instanceof ReflectionNamedType) ||
+            !AttributesUtils::instatiatable($propertyType)
+        ) throw new \Error('Attribute #[Child] requires a property with a type that is a controller');
+        
+        return new self($propertyType->getName());
     }
 
     public function getInstance() {
@@ -41,6 +65,9 @@ class Controller {
     }
     public function getMetadata(): AttributeController {
         return $this->metadata;
+    }
+    public function getChilds(): array {
+        return $this->childs;
     }
     public function getRoutes(): array {
         return $this->routes;

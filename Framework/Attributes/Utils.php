@@ -12,4 +12,9 @@ class Utils {
         }
         return $found;
     }
+
+    // Check if a type is a class/class constructor
+    public static function instatiatable($type) {
+        return $type != 'Closure' && !is_callable($type) && class_exists($type);
+    }
 }

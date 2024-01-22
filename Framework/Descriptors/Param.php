@@ -8,11 +8,6 @@ use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionParameter;
 
-// Check if a type is a class/class constructor
-function instatiatable ($type){
-    return $type != 'Closure' && !is_callable($type) && class_exists($type);
-}
-
 class Param {
 
     public function __construct(private ReflectionParameter $metadata) {}
@@ -27,7 +22,7 @@ class Param {
             if(
                 $bodyParserType == null ||
                 !($bodyParserType instanceof ReflectionNamedType) ||
-                !instatiatable($bodyParserType)
+                !AttributesUtils::instatiatable($bodyParserType)
             ) throw new \Error('Attribute #[BodyParser] requires a type that implements Framework\BodyParsers\BodyParser');
 
             $bodyParserClassName = $bodyParserType->getName();

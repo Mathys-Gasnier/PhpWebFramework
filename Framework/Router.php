@@ -9,7 +9,7 @@ use Framework\Descriptors\Params\QueryParam;
 use Framework\Descriptors\Route as DescriptorRoute;
 
 class Invoker {
-    public static function invokeRoute(DescriptorRoute $route, DescriptorController $controller, Request $request): Response {
+    public static function invokeRoute(DescriptorRoute $route, Request $request): Response {
         $args = [];
 
         // resolving route params to real value args
@@ -25,7 +25,7 @@ class Invoker {
             }
         }
         
-        return $route->getMethod()->invoke($controller->getInstance(), ...$args);
+        return $route->getMethod()->invoke($route->getOwner()->getInstance(), ...$args);
     }
 }
 
@@ -36,32 +36,44 @@ class Router {
     ) {}
 
     public function route(Request $request): Response {
-        $path = ltrim($request->getPath(), '/');
+        $path = trim($request->getPath(), '/');
         
         foreach($this->controllerManager->getControllers() as $controller) {
-            $controllerPath = ltrim($controller->getMetadata()->getPath(), '/');
+            $controllerPath = trim($controller->getMetadata()->getPath(), '/');
             
             // If the start of the path is the same as the controller path, then we can proceed
             if(!str_starts_with($path, $controllerPath)) continue;
             
             // We try to match a route in the controller
-            $subPath = ltrim(substr($path, strlen($controllerPath)), '/');
+            $subPath = trim(substr($path, strlen($controllerPath)), '/');
             $route = $this->routeInController($request, $subPath, $controller);
 
             // If we found a route we invoke it and return the response
             if($route == null) continue;
-            return Invoker::invokeRoute($route, $controller, $request);
+            return Invoker::invokeRoute($route, $request);
         }
 
         return new Response("Not Found", 404);
     }
 
     private function routeInController(Request $request, string $path, DescriptorController $controller): ?DescriptorRoute {
+
+        foreach($controller->getChilds() as $childController) {
+            $controllerPath = trim($childController->getMetadata()->getPath(), '/');
+
+            // If the start of the path is not the same as the controller path, then we can skip this controller
+            if(!str_starts_with($path, $controllerPath)) continue;
+
+            $subPath = trim(substr($path, strlen($controllerPath)), '/');
+            
+            return $this->routeInController($request, $subPath, $childController);
+        }
+
         foreach($controller->getRoutes() as $route) {
             // Try to find a matching route by method and path
             if($route->getMetadata()->getMethod() != $request->getMethod()) continue;
             
-            $routePath = ltrim($route->getMetadata()->getPath(), '/');
+            $routePath = trim($route->getMetadata()->getPath(), '/');
 
             if($path != $routePath) continue;
 

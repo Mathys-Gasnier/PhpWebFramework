@@ -1,12 +1,16 @@
 <?php
 namespace Controllers;
 
+use Framework\Attributes\Child;
 use Framework\Attributes\Controller;
 use Framework\Attributes\Route;
 use Framework\Response;
 
 #[Controller("/test1")]
 class Test1Controller {
+
+    #[Child()]
+    public SubController $controller;
 
     #[Route("/")]
     function coucou(): Response {

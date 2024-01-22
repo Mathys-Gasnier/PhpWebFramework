@@ -12,7 +12,8 @@ class Route {
 
     public function __construct(
         private AttributeRoute $metadata,
-        private ReflectionMethod $method
+        private ReflectionMethod $method,
+        private Controller $owner
     ) {
         $returnType = $method->getReturnType();
         
@@ -36,5 +37,8 @@ class Route {
     }
     public function getParams(): array {
         return $this->params;
+    }
+    public function getOwner(): Controller {
+        return $this->owner;
     }
 }
