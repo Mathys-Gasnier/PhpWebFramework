@@ -4,35 +4,22 @@ namespace Framework;
 use Framework\ControllerManager;
 use Framework\Request;
 use Framework\Descriptors\Controller as DescriptorController;
+use Framework\Descriptors\Params\BodyParserParam;
+use Framework\Descriptors\Params\QueryParam;
 use Framework\Descriptors\Route as DescriptorRoute;
-use ReflectionNamedType;
-
-function instatiatable ($type){
-    return $type != 'Closure' && !is_callable($type) && class_exists($type);
-}
 
 class Invoker {
     public static function invokeRoute(DescriptorRoute $route, DescriptorController $controller, Request $request): Response {
         $args = [];
 
         foreach($route->getParams() as $param) {
-            [$paramType, $paramMetadata] = $param;
-            if($paramType == "query_param") {
-                if(!isset($request->getParams()[$paramMetadata->getName()])) {
-                    return new Response("Missing query param `" . $paramMetadata->getName() . "`", 400);
+            if($param instanceof QueryParam) {
+                if(!isset($request->getParams()[$param->getMetadata()->getName()])) {
+                    return new Response("Missing query param `" . $param->getMetadata()->getName() . "`", 400);
                 }
-                $args[] = $request->getParams()[$paramMetadata->getName()];
-            }else if($paramType == "body_parser") {
-                $bodyParserType = $paramMetadata->getType();
-                if(
-                    $bodyParserType == null ||
-                    !($bodyParserType instanceof ReflectionNamedType) ||
-                    !instatiatable($bodyParserType)
-                ) throw new \Error('Not a compatible body parser');
-
-                $bodyParserClassName = $bodyParserType->getName();
-                
-                $args[] = new $bodyParserClassName($request->getBody());
+                $args[] = $request->getParams()[$param->getMetadata()->getName()];
+            }else if($param instanceof BodyParserParam) {
+                $args[] = new ($param->getBodyParserClassName())($request->getBody());
             }
         }
         

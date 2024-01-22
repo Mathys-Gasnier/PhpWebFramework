@@ -5,7 +5,7 @@ class Request {
     public function __construct(
         private string $path,
         private Method $method,
-        private $params,
+        private $params, // URL params of the request (?name=World)
         private string $body
     ) {}
 
