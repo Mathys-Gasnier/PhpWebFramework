@@ -6,8 +6,14 @@ class Server {
     private Router $router;
     
     public function __construct(array $controllers) {
-        $this->controllerManager = new ControllerManager($controllers);
-        $this->router = new Router($this->controllerManager);
+        try {
+            $this->controllerManager = new ControllerManager($controllers);
+            $this->router = new Router($this->controllerManager);
+        }catch(\Error $err) {
+            http_response_code(500);
+            echo "Internal Server Error<br/><br/>\n\n";
+            throw $err;
+        }
     }
     
     public function handle() {
@@ -26,9 +32,15 @@ class Server {
         // Getting the raw text body is dumb in php.
         $body = file_get_contents('php://input');
 
-        $request = new Request($path, $method, $params, $body);
+        try {
+            $request = new Request($path, $method, $params, $body);
 
-        $response = $this->router->route($request);
+            $response = $this->router->route($request);
+        }catch(\Error $err) {
+            http_response_code(500);
+            echo "Internal Server Error<br/><br/>\n\n";
+            throw $err;
+        }
     	
         http_response_code($response->code);
         echo $response->body;

@@ -4,6 +4,7 @@ namespace Framework\Descriptors;
 use Framework\Attributes\Utils as AttributesUtils;
 use Framework\Descriptors\Params\BodyParserParam;
 use Framework\Descriptors\Params\QueryParam;
+use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionParameter;
 
@@ -22,15 +23,20 @@ class Param {
         }else if(AttributesUtils::findAttribute($metadata, "Framework\Attributes\BodyParser") != null) {
             $bodyParserType = $metadata->getType();
             
-            // Makes sure the type is a body parser
-            // TODO: Add a check to see if the type extends BodyParser
+            // Makes sure the type is a class/class constructor
             if(
                 $bodyParserType == null ||
                 !($bodyParserType instanceof ReflectionNamedType) ||
                 !instatiatable($bodyParserType)
-            ) throw new \Error('Not a compatible body parser');
+            ) throw new \Error('Attribute #[BodyParser] requires a type that implements Framework\BodyParsers\BodyParser');
 
             $bodyParserClassName = $bodyParserType->getName();
+            $reflection = new ReflectionClass($bodyParserClassName);
+
+            // Check if the type class implements body parser
+            if(
+                !in_array("Framework\BodyParsers\BodyParser", $reflection->getInterfaceNames())
+            ) throw new \Error('Attribute #[BodyParser] requires a type that implements Framework\BodyParsers\BodyParser');
 
             return new BodyParserParam($bodyParserClassName);
         }
