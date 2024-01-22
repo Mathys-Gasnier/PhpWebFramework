@@ -4,10 +4,7 @@ namespace Framework\Descriptors;
 use Framework\Attributes\Utils as AttributesUtils;
 use Framework\Attributes\Controller as AttributeController;
 use Framework\Descriptors\Route as DescriptorRoute;
-
-use ReflectionClass;
-use ReflectionNamedType;
-use ReflectionProperty;
+use Framework\Injector;
 
 class Controller {
     private $instance;
@@ -18,13 +15,14 @@ class Controller {
     public function __construct(
         $class // The Controller::class value
     ) {
-        $reflection = new ReflectionClass($class);
+        $reflection = new \ReflectionClass($class);
 
         // Getting the #[Controller()] attribute from the reflection class
         $attribute = AttributesUtils::findAttribute($reflection, "Framework\Attributes\Controller");
         if($attribute == null) throw new \Error('Missing controller attribute on ' . $reflection->getName());
+        
         $this->metadata = $attribute->newInstance();
-        $this->instance = new $class();
+        $this->instance = Injector::get()->construct($class);
 
         // Child controller are class properties with a #[Child()] attribute
         foreach($reflection->getProperties() as $property) {
@@ -47,13 +45,13 @@ class Controller {
         }
     }
 
-    public static function fromProperty(ReflectionProperty $property): Controller {
+    public static function fromProperty(\ReflectionProperty $property): Controller {
         $propertyType = $property->getType();
 
         // Makes sure the type is a class/class constructor
         if(
             $propertyType == null ||
-            !($propertyType instanceof ReflectionNamedType) ||
+            !($propertyType instanceof \ReflectionNamedType) ||
             !AttributesUtils::instatiatable($propertyType)
         ) throw new \Error('Attribute #[Child] requires a property with a type that is a controller');
         

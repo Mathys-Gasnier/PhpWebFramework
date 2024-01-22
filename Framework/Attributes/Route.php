@@ -1,10 +1,9 @@
 <?php
 namespace Framework\Attributes;
 
-use Attribute;
 use Framework\Method;
 
-#[Attribute(Attribute::TARGET_METHOD)]
+#[\Attribute(\Attribute::TARGET_METHOD)]
 class Route {
     public function __construct(
         private string $path,

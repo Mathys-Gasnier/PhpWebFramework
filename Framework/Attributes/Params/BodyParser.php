@@ -1,9 +1,7 @@
 <?php
 namespace Framework\Attributes;
 
-use Attribute;
-
-#[Attribute(Attribute::TARGET_PARAMETER)]
+#[\Attribute(\Attribute::TARGET_PARAMETER)]
 class BodyParser {
     public function __construct() {}
 }

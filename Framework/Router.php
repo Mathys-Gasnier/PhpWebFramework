@@ -4,9 +4,9 @@ namespace Framework;
 use Framework\ControllerManager;
 use Framework\Request;
 use Framework\Descriptors\Controller as DescriptorController;
-use Framework\Descriptors\Params\BodyParserParam;
-use Framework\Descriptors\Params\QueryParam;
 use Framework\Descriptors\Route as DescriptorRoute;
+use Framework\Descriptors\Params\QueryParam;
+use Framework\Descriptors\Params\BodyParserParam;
 
 class Invoker {
     public static function invokeRoute(DescriptorRoute $route, Request $request): Response {

@@ -4,15 +4,12 @@ namespace Framework\Descriptors;
 use Framework\Attributes\Route as AttributeRoute;
 use Framework\Descriptors\Param as DescriptorParam;
 
-use ReflectionMethod;
-use ReflectionNamedType;
-
 class Route {
     private array $params = [];
 
     public function __construct(
         private AttributeRoute $metadata,
-        private ReflectionMethod $method,
+        private \ReflectionMethod $method,
         private Controller $owner
     ) {
         $returnType = $method->getReturnType();
@@ -20,7 +17,7 @@ class Route {
         // The return type should exist, and be a response
         if(
             $returnType == null ||
-            !($returnType instanceof ReflectionNamedType) ||
+            !($returnType instanceof \ReflectionNamedType) ||
             $returnType->getName() !== 'Framework\Response'
         ) throw new \Error('The return type of a route should always be Framework\Response');
 

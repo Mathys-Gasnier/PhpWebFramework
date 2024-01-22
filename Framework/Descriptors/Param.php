@@ -2,17 +2,14 @@
 namespace Framework\Descriptors;
 
 use Framework\Attributes\Utils as AttributesUtils;
-use Framework\Descriptors\Params\BodyParserParam;
 use Framework\Descriptors\Params\QueryParam;
-use ReflectionClass;
-use ReflectionNamedType;
-use ReflectionParameter;
+use Framework\Descriptors\Params\BodyParserParam;
 
 class Param {
 
-    public function __construct(private ReflectionParameter $metadata) {}
+    public function __construct(private \ReflectionParameter $metadata) {}
 
-    public static function construct(ReflectionParameter $metadata) {
+    public static function construct(\ReflectionParameter $metadata) {
         if(AttributesUtils::findAttribute($metadata, "Framework\Attributes\QueryParam") != null) {
             return new QueryParam($metadata);
         }else if(AttributesUtils::findAttribute($metadata, "Framework\Attributes\BodyParser") != null) {
@@ -21,12 +18,12 @@ class Param {
             // Makes sure the type is a class/class constructor
             if(
                 $bodyParserType == null ||
-                !($bodyParserType instanceof ReflectionNamedType) ||
+                !($bodyParserType instanceof \ReflectionNamedType) ||
                 !AttributesUtils::instatiatable($bodyParserType)
             ) throw new \Error('Attribute #[BodyParser] requires a type that implements Framework\BodyParsers\BodyParser');
 
             $bodyParserClassName = $bodyParserType->getName();
-            $reflection = new ReflectionClass($bodyParserClassName);
+            $reflection = new \ReflectionClass($bodyParserClassName);
 
             // Check if the type class implements body parser
             if(
@@ -37,7 +34,7 @@ class Param {
         }
     }
 
-    public function getMetadata(): ReflectionParameter {
+    public function getMetadata(): \ReflectionParameter {
         return $this->metadata;
     }
 
