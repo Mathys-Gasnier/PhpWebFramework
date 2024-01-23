@@ -1,14 +1,15 @@
 <?php
 namespace Framework;
 
+use Framework\Descriptors\Controller as DescriptorController;
+
 class Server {
-    private ControllerManager $controllerManager;
     private Router $router;
     
-    public function __construct(array $controllers) {
+    public function __construct(private array $controllers) {
         try {
-            $this->controllerManager = new ControllerManager($controllers);
-            $this->router = new Router($this->controllerManager);
+            $this-> controllers = array_map(fn($controller): DescriptorController => new DescriptorController($controller), $this->controllers);
+            $this->router = new Router($this->controllers);
         }catch(\Error $err) {
             http_response_code(500);
             echo "Internal Server Error<br/><br/>\n\n";

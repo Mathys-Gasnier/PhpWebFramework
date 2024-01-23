@@ -43,13 +43,13 @@ class Invoker {
 class Router {
 
     public function __construct(
-        private ControllerManager $controllerManager
+        private array $controllers
     ) {}
 
     public function route(Request $request): Response {
         $path = trim($request->getPath(), '/');
         
-        foreach($this->controllerManager->getControllers() as $controller) {
+        foreach($this->controllers as $controller) {
             $controllerPath = trim($controller->getMetadata()->getPath(), '/');
             
             // If the start of the path is the same as the controller path, then we can proceed
