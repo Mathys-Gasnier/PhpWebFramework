@@ -11,10 +11,16 @@ class Injector {
         return self::$instance;
     }
 
+    private array $instances = [];
+
     public function construct($class) {
-        if(method_exists($class, '__construct')) return new $class(...$this->resolveMethodDependencies($class, '__construct'));
-        
-        return new $class;
+        if(array_key_exists($class, $this->instances)) return $this->instances[$class];
+
+        if(method_exists($class, '__construct')) $instance = new $class(...$this->resolveMethodDependencies($class, '__construct'));
+        else $instance = new $class();
+
+        $this->instances[$class] = $instance;
+        return $instance;
     }
 
     private function resolveMethodDependencies($class, string $method): array {
@@ -32,10 +38,7 @@ class Injector {
 
             $className = $type->getName();
 
-            if(method_exists($className, '__construct'))
-                $args[] = new $className(...$this->resolveMethodDependencies($className, '__construct'));
-            else
-                $args[] = new $className;
+            $args[] = $this->construct($className);
         }
 
         return $args;
