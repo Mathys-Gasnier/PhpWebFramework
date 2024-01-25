@@ -8,7 +8,10 @@ class Server {
     
     public function __construct(private array $controllers) {
         try {
-            $this-> controllers = array_map(fn($controller): DescriptorController => new DescriptorController($controller), $this->controllers);
+            $this->controllers = array_map(
+                fn($controller): DescriptorController => new DescriptorController($controller),
+                $this->controllers
+            );
             $this->router = new Router($this->controllers);
         }catch(\Error $err) {
             http_response_code(500);
@@ -19,8 +22,7 @@ class Server {
     
     public function handle() {
 
-        // Could also get from SERVER['REQUEST_URI']
-        $path = isset($_GET['path']) ? $_GET['path'] : '';
+        $path = $_SERVER['REQUEST_URI'];
 
         // Is there an easier way to do it ?
         $method = match ($_SERVER['REQUEST_METHOD']) {

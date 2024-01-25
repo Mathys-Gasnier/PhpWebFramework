@@ -5,6 +5,7 @@ use Framework\Attributes\Controller;
 use Framework\Attributes\Route;
 use Framework\Attributes\Params\QueryParam;
 use Framework\Attributes\Params\BodyParser;
+use Framework\BodyParsers\JsonBodyParser;
 use Framework\BodyParsers\RawBodyParser;
 use Framework\Method;
 use Framework\Response;
@@ -18,8 +19,10 @@ class TestController {
     }
 
     #[Route("/", Method::POST)]
-    function posting(#[BodyParser] RawBodyParser $body): Response {
-        return new Response("\nYeah post ! with body: " . $body->get());
+    function posting(#[BodyParser] JsonBodyParser $body): Response {
+        print_r($body->get());
+        return Response::json($body->get());
+        // return new Response("\nYeah post ! with body: " . print_r($body->get()));
     }
 
     #[Route("/test")]

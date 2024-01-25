@@ -1,4 +1,4 @@
 RewriteEngine on
+RewriteBase /tests/
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ tests/index.php?path=$1 [NC,L,QSA]
+RewriteRule ^(.*)$ /tests/index.php [L,QSA]
