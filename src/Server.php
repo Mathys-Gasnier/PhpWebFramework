@@ -22,7 +22,7 @@ class Server {
     
     public function handle() {
 
-        $path = $_SERVER['REQUEST_URI'];
+        $path = explode("?", $_SERVER['REQUEST_URI'])[0];
 
         // Is there an easier way to do it ?
         $method = match ($_SERVER['REQUEST_METHOD']) {
